@@ -6,7 +6,6 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Welcome from './pages/Welcome';
-import Clientes from './components/Clientes';
 import './css/app.css';
 
 const App = () => {
@@ -17,8 +16,7 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/welcome/:userID" element={<Welcome />} />
-                <Route path="/welcome/:userID/clients" element={<Clientes />} />
+                <Route path="/welcome/:userID/*" element={<Welcome />} />
             </Routes>
             <Footer />
         </Router>

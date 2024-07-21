@@ -1,0 +1,117 @@
+.clientes-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.clientes-container h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.clientes-container .error {
+    color: red;
+    margin-bottom: 1rem;
+}
+
+.clientes-container .success {
+    color: green;
+    margin-bottom: 1rem;
+}
+
+.clientes-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 2rem;
+}
+
+.clientes-form div {
+    margin-bottom: 1rem;
+}
+
+.clientes-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.clientes-form input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.clientes-form button {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.clientes-form button:hover {
+    background-color: #0033ff;
+}
+
+.clientes-list {
+    width: 100%;
+    max-width: 700px;
+}
+
+.clientes-list h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.clientes-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.clientes-list li {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.clientes-list li button {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #e8f809;
+    color: black;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.clientes-list li button:hover {
+    background-color: #007bff;
+}
+
+.clientes-list li button.delete {
+    background-color: #f44336;
+    margin-left: 0.5rem;
+}
+
+.clientes-list li button.delete:hover {
+    background-color: #e53935;
+}

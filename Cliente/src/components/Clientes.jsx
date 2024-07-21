@@ -15,6 +15,7 @@ const Clientes = () => {
   useEffect(() => {
     fetchClientes();
   }, []);
+
   const fetchClientes = async () => {
     try {
       const response = await axios.get("http://localhost:5000/clientes");
@@ -29,6 +30,10 @@ const Clientes = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    if (!nombre || !email || !direccion || !telefono) {
+      setError("Todos los campos son obligatorios.");
+      return;
+    }
     try {
       await axios.post("http://localhost:5000/cliente", {
         nombre,
@@ -43,10 +48,11 @@ const Clientes = () => {
       setDireccion("");
       setTelefono("");
     } catch (err) {
-      setError("Error al Crear el cliente: " + err.message);
+      setError("Error al crear el cliente: " + err.message);
     }
   };
-  const handleEditClient = async (id) => {
+
+  const handleEditClient = (id) => {
     setEditingClient(id);
     const client = clientes.find((c) => c.id === id);
     setNombre(client.nombre);
@@ -54,11 +60,15 @@ const Clientes = () => {
     setDireccion(client.direccion);
     setTelefono(client.telefono);
   };
+
   const handleUpdateClient = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
+    if (!nombre || !email || !direccion || !telefono) {
+      setError("Todos los campos son obligatorios.");
+      return;
+    }
     try {
       await axios.put(`http://localhost:5000/cliente/${editingClient}`, {
         nombre,
@@ -66,7 +76,7 @@ const Clientes = () => {
         telefono,
         email,
       });
-      setSuccess("Cliente Actualizado exitosamente.");
+      setSuccess("Cliente actualizado exitosamente.");
       fetchClientes();
       setEditingClient(null);
       setNombre("");
@@ -81,17 +91,17 @@ const Clientes = () => {
   const handleDeleteClient = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/cliente/${id}`);
-      setSuccess("Cliente Elimino exitosamente.");
+      setSuccess("Cliente eliminado exitosamente.");
       fetchClientes();
     } catch (err) {
-      setError("Error al Eliminar el cliente: " + err.message);
+      setError("Error al eliminar el cliente: " + err.message);
     }
   };
 
   return (
     <div className="clientes-container">
       <h1>Clientes</h1>
-      {error && <p className="error">{erorr}</p>}
+      {error && <p className="error">{error}</p>}
       {success && <p className="success">{success}</p>}
       <form
         className="clientes-form"
@@ -135,20 +145,28 @@ const Clientes = () => {
       </form>
       <div className="clientes-list">
         <h2>Lista de Clientes</h2>
-
         <ul>
           {clientes.map((cliente) => (
             <li key={cliente.id}>
-            Nombre: {cliente.nombre}
-            <br />
-            Email: {cliente.email}
-            <br />
-            Direccion: {cliente.direccion}
-            <br />
-            Telefono: {cliente.telefono}
-            <button onClick={()=>handleEditClient(cliente.id)} >Editar</button>
-            <button onClick={()=>handleDeleteClient(cliente.id)} >Eliminar</button>
-             </li>
+              Nombre: {cliente.nombre}
+              <br />
+              Email: {cliente.email}
+              <br />
+              Direccion: {cliente.direccion}
+              <br />
+              Telefono: {cliente.telefono}
+              <div>
+                <button onClick={() => handleEditClient(cliente.id)}>
+                  Editar
+                </button>
+                <button
+                  className="delete"
+                  onClick={() => handleDeleteClient(cliente.id)}
+                >
+                  Eliminar
+                </button>
+              </div>
+            </li>
           ))}
         </ul>
       </div>
