@@ -1,129 +1,254 @@
-import React, {useState, useEffect} from 'react'
-import axios from 'axios'
-import '../css/Ventas.css'
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "../css/Ventas.css";
 
-const Ventas = () => {
-const [ventas, setVentas] = useState([]);
-const [cliente_id, setCliente_id] = useState('');
-const [productos,setProductos]=useState([]);
-const [producto_id, setProducto_id]=useState('');
-const [cantidad, setCantidad]=useState('');
-const [precio, setPrecio] = useState('');
-const [editingVenta,setEditingVenta] = useState(null);
-const [error,setError]= useState('');
-const [success,setSuccess] = useState('');
-const [subTotal,setSubtotal]= useState(0);
-const url = 'http://localhost:5000';
-useEffect(()=>{
-    fetchVentas();
-},[]);
+const Sales = () => {
+  const [productos, setProductos] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [clienteID, setClienteID] = useState("");
+  const [searchCliente, setSearchCliente] = useState("");
+  const [productoID, setProductoID] = useState("");
+  const [cantidad, setCantidad] = useState(1);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [subtotal, setSubtotal] = useState(0);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [salesHistory, setSalesHistory] = useState([]);
+  const [showSalesHistory, setShowSalesHistory] = useState(false);
+  const [selectedSale, setSelectedSale] = useState(null);
 
-const fetchVentas = async () =>{
+  useEffect(() => {
+    fetchProductos();
+    fetchClientes();
+  }, []);
+
+  const fetchProductos = async () => {
     try {
-        const response = await axios.get(url+'/ventas');
-        setVentas(response.data);
+      const response = await axios.get("http://localhost:5000/productos");
+      setProductos(response.data);
     } catch (err) {
-        setError('Error al obtener las ventas '+ err.message )
+      setError("Error al obtener los productos: " + err.message);
     }
-} 
-const handleCreateVenta = async (e) =>{
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  };
 
-
-    if (!cliente_id || productos.length === 0 ){
-        setError('Debe seleccionar un cliente y agregar al menos un producto.');
-        return;
-    }
-
+  const fetchClientes = async () => {
     try {
-        await axios.post(url+'/venta', {cliente_id,productos});
-        setSuccess('Venta crada exitosamente.');
-        fetchVentas();
-        setCliente_id('');
-        setProductos([]);
+      const response = await axios.get("http://localhost:5000/clientes");
+      setClientes(response.data);
     } catch (err) {
-        setError('Error al Crear la venta: '+ err.message )
+      setError("Error al obtener los clientes: " + err.message);
     }
-}
+  };
 
-const handleAddProduct = () =>{
-    if (!producto_id || !cantidad || !precio){
-        setError('Todos los campos del producto son obligatorios');
-        return;
+  const fetchSalesHistory = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/ventas");
+      setSalesHistory(response.data);
+    } catch (err) {
+      setError("Error al obtener el historial de ventas: " + err.message);
     }
-    setProductos([...productos,{producto_id, cantidad, precio}]);
-    setProducto_id('');
-    setCantidad('');
-    setPrecio('');
-    setError('');
-}
+  };
 
-const handleEditVenta = async (id) =>{
-    setEditingVenta(id);
-    const venta = ventas.find(v => v.id === id);
-    setCliente_id(venta.cliente_id);
-    setProductos(venta.productos);
-}
-const handleUpdateVenta = ()=>{
-    setSuccess('Editando la venta')
-}
+  const fetchSaleDetails = async (saleId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/detalle-venta/${saleId}`
+      );
+      setSelectedSale(response.data[0]);
+    } catch (err) {
+      setError("Error al obtener los detalles de la venta: " + err.message);
+    }
+  };
 
-return (
-    <div className='ventas-container'>
-        <h1>Ventas</h1>
-        {error && <p className='error'>{error}</p>}
-        {success && <p className='success'>{success}</p>}
-        <form className='ventas-form' onSubmit={editingVenta ? handleUpdateVenta : handleCreateVenta}>
-        <div>
-            <label>Cliente ID:</label>
-            <input type="number" value={cliente_id} onChange={(e)=>setCliente_id(e.target.value)} />
+  const handleAddProduct = () => {
+    const producto = productos.find((p) => p.id === parseInt(productoID));
+    if (producto) {
+      const newProduct = { ...producto, cantidad: parseInt(cantidad) };
+      setSelectedProducts([...selectedProducts, newProduct]);
+      setSubtotal(subtotal + newProduct.cantidad * newProduct.precio);
+    }
+  };
+
+  const handleCreateSale = async () => {
+    setError("");
+    setSuccess("");
+    const venta = {
+      cliente_id: clienteID,
+      productos: selectedProducts.map((p) => ({
+        producto_id: p.id,
+        cantidad: p.cantidad,
+        precio: p.precio,
+      })),
+    };
+    try {
+      const response = await axios.post("http://localhost:5000/venta", venta);
+      setSuccess("Venta creada exitosamente.");
+      setSelectedProducts([]);
+      setSubtotal(0);
+      setClienteID("");
+      setSearchCliente("");
+    } catch (err) {
+      setError("Error al crear la venta: " + err.message);
+    }
+  };
+
+  const filteredClientes = clientes.filter((cliente) =>
+    cliente.nombre.toLowerCase().includes(searchCliente.toLowerCase())
+  );
+  const formatDateForInput = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0]; 
+  };
+
+  return (
+    <div className="sales-container">
+      <h1>Ventas</h1>
+      {error && <p className="error">{error}</p>}
+      {success && <p className="success">{success}</p>}
+      <div className="sales-buttons">
+        <button
+          onClick={() => {
+            setShowSalesHistory(!showSalesHistory);
+            fetchSalesHistory();
+          }}
+        >
+          {showSalesHistory ? "Volver a Ventas" : "Historial de Ventas"}
+        </button>
+      </div>
+      {showSalesHistory ? (
+        <div className="sales-history">
+          <h2>Historial de Ventas</h2>
+          <table className="sales-history-table">
+            <thead>
+              <tr>
+                <th>ID Venta</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody onClick={() => fetchSaleDetails(sale.id)}>
+            {salesHistory.map(sale => (
+                                    <tr key={sale.id} onClick={() => fetchSaleDetails(sale.id)}>
+                                        <td>{sale.id}</td>
+                                        <td>{sale.cliente}</td>
+                                        <td>
+                                            <input
+                                                type="date"
+                                                value={formatDateForInput(sale.fecha)}
+                                                disabled
+                                            />
+                                        </td>
+                                        <td>${sale.total}</td>
+                                    </tr>
+                                ))}
+            </tbody>
+          </table>
+          {selectedSale ? (
+            <div className="sale-details">
+              <h3>Detalles de la Venta</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedSale.map((producto, index) => (
+                    <tr key={index}>
+                      <td>{producto.nombre}</td>
+                      <td>{producto.cantidad}</td>
+                      <td>${producto.precio}</td>
+                      <td>${producto.cantidad * producto.precio}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <h3>Seleccione una Venta...</h3>
+          )}
         </div>
+      ) : (
         <div>
-            <label >Agregar Producto</label>
-            <input type="number" placeholder='Producto ID' value={producto_id} onChange={(e)=>setProducto_id(e.target.value)} />
-            <input type="number" placeholder='Cantidad' value={cantidad} onChange={(e)=>setCantidad(e.target.value)} />
-            <input type="number" placeholder='Precio' value={precio} onChange={(e)=>setPrecio(e.target.value)} />
-            <button type='button' onClick={handleAddProduct}>Agregar Producto</button>
-            <h2>Lista Productos</h2>
-                    <ul>
-                    {productos.map(producto=>(
-                        <li>
-                            {producto.producto_id}
-                            <br />
-                            {producto.cantidad}
-                            <br />
-                            {producto.precio}
-                            <br />
-                            Subtotal: {producto.cantidad*producto.precio}
-                           
-                        </li>
-                    ))}
-                    </ul>
-                    <h3>
-                        Subtotal = $ {}
-                    </h3>
-                    
-        </div>
-        <button type='submit'>{editingVenta ? 'Actualizar Venta': 'Crear Venta'}</button>
-        </form>
-        <div className='ventas-list'>
-            <h2>Lista de Ventas</h2>
-            <ul>
-                {ventas.map(venta =>(
-                    <li key={venta.id}>
-                        Cliente ID: {venta.cliente_id}
-                        <br />
-                        Fecha: {venta.fecha}
-                        <br />
-                        Total: {venta.total}
-                    </li>
+          <div className="sales-form">
+            <div>
+              <label>Cliente:</label>
+              <input
+                type="text"
+                value={searchCliente}
+                onChange={(e) => setSearchCliente(e.target.value)}
+                placeholder="Buscar cliente"
+              />
+              <select
+                value={clienteID}
+                onChange={(e) => setClienteID(e.target.value)}
+              >
+                <option value="">Seleccione un cliente</option>
+                {filteredClientes.map((cliente) => (
+                  <option key={cliente.id} value={cliente.id}>
+                    {cliente.nombre}
+                  </option>
                 ))}
-            </ul>
+              </select>
+            </div>
+            <div>
+              <label>Producto:</label>
+              <select
+                value={productoID}
+                onChange={(e) => setProductoID(e.target.value)}
+              >
+                <option value="">Seleccione un producto</option>
+                {productos.map((producto) => (
+                  <option key={producto.id} value={producto.id}>
+                    {producto.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>Cantidad:</label>
+              <input
+                type="number"
+                min="1"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
+              />
+            </div>
+            <button onClick={handleAddProduct}>Agregar Producto</button>
+          </div>
+          <div className="sales-list">
+            <h2>Carrito</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedProducts.map((producto, index) => (
+                  <tr key={index}>
+                    <td>{producto.nombre}</td>
+                    <td>{producto.cantidad}</td>
+                    <td>${producto.precio}</td>
+                    <td>${producto.cantidad * producto.precio}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <h3>SubTotal: ${subtotal.toFixed(2)}</h3>
+            <button className="crear-venta" onClick={handleCreateSale}>Crear Venta</button>
+          </div>
         </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default Ventas
+export default Sales;
