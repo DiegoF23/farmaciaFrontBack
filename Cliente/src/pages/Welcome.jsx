@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link, Routes, Route } from 'react-router-dom';
 import Clientes from '../components/Clientes';
 import Ventas from '../components/Ventas';
+import Orders from '../components/Orders';
 import '../css/Welcome.css';
 
 const Welcome = () => {
@@ -24,7 +25,7 @@ const Welcome = () => {
                     <Route path="clients" element={<Clientes />} />
                     <Route path="products" element={<div>Productos Component</div>} />
                     <Route path="sales" element={<Ventas/>} />
-                    <Route path="orders" element={<div>Pedidos Component</div>} />
+                    <Route path="orders" element={<Orders/>} />
                 </Routes>
             </div>
         </div>
